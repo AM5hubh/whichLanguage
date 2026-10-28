@@ -1,9 +1,23 @@
 import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 dotenv.config();
 
 const app = express();
 app.use(express.json());
+
+const allowedOrigins = [
+  process.env.ALLOWED1,
+  process.env.ALLOWED2,
+  process.env.ALLOWED3,
+  process.env.ALLOWED4,
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+  }),
+);
 
 const PORT = process.env.PORT || 3000;
 
@@ -29,35 +43,70 @@ app.post("/jev", async (req, res) => {
         Accept: "application/json",
       },
       body: JSON.stringify({
-        model: "typesafe/jev-1.13",
+        // model: "typesafe/jev-1.13",
+        // model: "typesafe/jev-1.14",
+        model: "~typesafe/jev-latest",
+        // model: "baseten/mammoth-1:free",
+        // model: "baseten/elephant-1:free",
         state: input,
         questions: {
           whichLanguage: {
-            type: "choice",
+            type: "score",
             instructions:
               "Which programming language is the best fit for building this project?",
-            criteria: {
-              javascript_typescript:
-                "Choose JavaScript or TypeScript for full-stack web development, React, Next.js, and Node.js applications.",
-              python:
-                "Choose Python for AI/ML, LLM integrations, RAG pipelines, automation, and FastAPI or Django backends.",
-              java: "Choose Java for enterprise applications, large-scale backends, and JVM-based systems.",
-              cpp: "Choose C++ for performance-critical applications, systems programming, and game engines.",
-              csharp:
-                "Choose C# for .NET applications, enterprise backends, Windows software, and Unity games.",
-              go: "Choose Go for cloud-native applications, microservices, networking, and concurrent backend services.",
-              rust: "Choose Rust for systems programming, performance-sensitive applications, and memory-safe services.",
-              dart: "Choose Dart for cross-platform applications built with Flutter.",
-              kotlin:
-                "Choose Kotlin for modern Android applications and JVM-based services.",
-              swift: "Choose Swift for native Apple-platform applications.",
-              php: "Choose PHP for Laravel, WordPress, and server-rendered web applications.",
-              sql: "Choose SQL for database queries, relational data management, and analytics; it is generally complementary to a primary programming language.",
-              solidity:
-                "Choose Solidity for Ethereum-compatible smart contracts and decentralized applications.",
-              multiple_languages:
-                "Choose multiple languages when different project components benefit from different ecosystems, such as TypeScript for the frontend and Python for AI services.",
-            },
+            criteria: [
+              {
+                name: "javascript_typescript",
+                description:
+                  "Choose JavaScript or TypeScript for full-stack web development, React, Next.js, and Node.js applications.",
+              },
+              {
+                name: "python",
+                description:
+                  "Choose Python for AI/ML, LLM integrations, RAG pipelines, automation, and FastAPI or Django backends.",
+              },
+              {
+                name: "java",
+                description:
+                  "Choose Java for enterprise applications, large-scale backends, and JVM-based systems.",
+              },
+              {
+                name: "cpp",
+                description:
+                  "Choose C++ for performance-critical applications, systems programming, and game engines.",
+              },
+              {
+                name: "csharp",
+                description:
+                  "Choose C# for .NET applications, enterprise backends, Windows software, and Unity games.",
+              },
+              {
+                name: "go",
+                description:
+                  "Choose Go for cloud-native applications, microservices, networking, and concurrent backend services.",
+              },
+              {
+                name: "rust",
+                description:
+                  "Choose Rust for systems programming, performance-sensitive applications, and memory-safe services.",
+              },
+              {
+                name: "dart",
+                description:
+                  "Choose Dart for cross-platform applications built with Flutter.",
+              },
+
+              {
+                name: "sql",
+                description:
+                  "Choose SQL for database queries, relational data management, and analytics. It is generally complementary to a primary programming language.",
+              },
+              {
+                name: "solidity",
+                description:
+                  "Choose Solidity for Ethereum-compatible smart contracts and decentralized applications.",
+              },
+            ],
           },
         },
       }),
@@ -74,9 +123,12 @@ app.post("/jev", async (req, res) => {
       });
     }
 
-    console.log("Jev result:", result);
+    console.log("Id:", result.id);
+    console.log("Provider:", result.provider);
+    console.log("Model:", result.model);
+    console.log("Usage:", result.usage);
 
-    return res.json(result);
+    return res.json(result.answers);
   } catch (error) {
     console.error("Server error:", error);
 
